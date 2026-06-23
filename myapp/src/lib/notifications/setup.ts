@@ -33,6 +33,9 @@ export function isAndroidExpoGo(): boolean {
 
 /** Lazy accessor — never called at module level, only inside function bodies. */
 function N() {
+  if (Constants.appOwnership === 'expo') {
+    return null;
+  }
   return require('expo-notifications') as typeof import('expo-notifications');
 }
 
@@ -51,9 +54,11 @@ function N() {
 export async function createAndroidChannel(): Promise<void> {
   if (Platform.OS !== 'android') return;
   try {
-    await N().setNotificationChannelAsync(CHANNEL_ID, {
+    const Notifications = N();
+    if (!Notifications) return;
+    await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
       name: 'Habit Reminders',
-      importance: N().AndroidImportance.HIGH,
+      importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FFE600',
       sound: 'default',
@@ -77,7 +82,9 @@ export { getPermissionStatus, requestPermission, openSettings } from './permissi
  */
 export function registerForegroundHandler(): void {
   try {
-    N().setNotificationHandler({
+    const Notifications = N();
+    if (!Notifications) return;
+    Notifications.setNotificationHandler({
       handleNotification: async () => ({
         shouldShowAlert: true,
         shouldPlaySound: true,
@@ -98,6 +105,7 @@ import { handleNotificationTap } from './deepLink';
 export function registerTapHandler(): { remove: () => void } {
   try {
     const Notifications = N();
+    if (!Notifications) return { remove: () => undefined };
     const navigateFromData = (data: Record<string, unknown> | undefined) => {
       handleNotificationTap(data);
     };

@@ -31,7 +31,7 @@ function getIconNameOrEmoji(emoji: string): IconType {
 export default function AlertsScreen() {
   const theme = useTheme();
   const { habits } = useHabits();
-  const { permissionStatus, requestPermission, openSettings } = useNotifications();
+  const { permissionStatus, requestPermission, openSettings, triggerTestNotification } = useNotifications();
   const [isTesting, setIsTesting] = useState(false);
 
   const handleTriggerTest = async () => {
@@ -42,24 +42,7 @@ export default function AlertsScreen() {
 
     setIsTesting(true);
     try {
-      // Dynamic import to prevent crash on web platforms without notification access
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const Notifications = require('expo-notifications');
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: '🔥 Keep the chain alive!',
-          body: 'This is a test notification from Streaks Habit Tracker.',
-          sound: 'default',
-          data: {
-            url: '/',
-            test: true,
-          },
-        },
-        trigger: {
-          seconds: 3,
-        },
-      });
-
+      await triggerTestNotification(3);
       Alert.alert('Success!', 'Test notification scheduled in 3 seconds. Lock your screen or go to home to see it.');
     } catch (err) {
       console.warn('Failed to schedule test notification:', err);

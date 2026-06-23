@@ -1,14 +1,20 @@
 import { Platform, Linking } from 'react-native';
 import type { PermissionStatus } from 'expo-notifications';
+import Constants from 'expo-constants';
 
 function N() {
+  if (Constants.appOwnership === 'expo') {
+    return null;
+  }
   return require('expo-notifications') as typeof import('expo-notifications');
 }
 
 /** Returns the current notification permission status without prompting. */
 export async function getPermissionStatus(): Promise<PermissionStatus> {
   try {
-    const { status } = await N().getPermissionsAsync();
+    const Notifications = N();
+    if (!Notifications) return 'undetermined' as PermissionStatus;
+    const { status } = await Notifications.getPermissionsAsync();
     return status;
   } catch (error) {
     console.warn('[permissions] getPermissionStatus error:', error);
@@ -22,9 +28,11 @@ export async function getPermissionStatus(): Promise<PermissionStatus> {
  */
 export async function requestPermission(): Promise<PermissionStatus> {
   try {
-    const { status: existing } = await N().getPermissionsAsync();
+    const Notifications = N();
+    if (!Notifications) return 'undetermined' as PermissionStatus;
+    const { status: existing } = await Notifications.getPermissionsAsync();
     if (existing === 'granted') return existing;
-    const { status } = await N().requestPermissionsAsync();
+    const { status } = await Notifications.requestPermissionsAsync();
     return status;
   } catch (error) {
     console.warn('[permissions] requestPermission error:', error);

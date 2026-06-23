@@ -1,13 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Habit, Frequency } from '@/lib/habits/types';
 import { CHANNEL_ID, createAndroidChannel } from './setup';
+import Constants from 'expo-constants';
 
 function N() {
+  if (Constants.appOwnership === 'expo') {
+    return null;
+  }
   return require('expo-notifications') as typeof import('expo-notifications');
 }
 
 async function hasNotificationPermission(): Promise<boolean> {
   const Notifications = N();
+  if (!Notifications) return false;
   const existing = await Notifications.getPermissionsAsync();
   if (existing.status === 'granted') return true;
 
@@ -22,9 +27,11 @@ export async function scheduleHabitReminders(habit: Habit): Promise<string[]> {
     const enabled = await AsyncStorage.getItem('streaks_reminders_enabled_v1');
     if (enabled === 'false') return ids;
 
+    const Notifications = N();
+    if (!Notifications) return ids;
+
     await createAndroidChannel();
 
-    const Notifications = N();
     const allowed = await hasNotificationPermission();
     if (!allowed) return ids;
 
@@ -80,6 +87,7 @@ export async function cancelHabitReminders(notificationIds: string[]): Promise<v
 
   try {
     const Notifications = N();
+    if (!Notifications) return;
     await Promise.all(
       notificationIds.map((id) =>
         Notifications.cancelScheduledNotificationAsync(id).catch((error) => {

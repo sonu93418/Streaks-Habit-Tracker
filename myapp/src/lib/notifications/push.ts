@@ -45,6 +45,9 @@ export function isRunningInExpoGo(): boolean {
 
 /** Lazy accessor — never called at module level, only inside function bodies. */
 function N() {
+  if (Constants.appOwnership === 'expo') {
+    return null;
+  }
   return require('expo-notifications') as typeof import('expo-notifications');
 }
 
@@ -87,12 +90,20 @@ export async function registerForPushNotifications(): Promise<PushRegistrationRe
 
   // ── Guard 3: Permission ───────────────────────────────────────────────────
   try {
-    let { status } = await N().getPermissionsAsync();
+    const Notifications = N();
+    if (!Notifications) {
+      return {
+        ok: false,
+        reason: 'expo-go',
+        message: 'Notifications module not available in this environment.',
+      };
+    }
+    let { status } = await Notifications.getPermissionsAsync();
 
     if (status !== 'granted') {
       // On Android 13+ we must explicitly request POST_NOTIFICATIONS
       if (Platform.OS === 'android' || Platform.OS === 'ios') {
-        const result = await N().requestPermissionsAsync();
+        const result = await Notifications.requestPermissionsAsync();
         status = result.status;
       }
     }
@@ -120,7 +131,7 @@ export async function registerForPushNotifications(): Promise<PushRegistrationRe
     }
 
     // ── Fetch token ──────────────────────────────────────────────────────────
-    const { data: token } = await N().getExpoPushTokenAsync({ projectId });
+    const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
 
     // Persist so Settings can show it without re-fetching on every mount
     await AsyncStorage.setItem(TOKEN_STORAGE_KEY, token);

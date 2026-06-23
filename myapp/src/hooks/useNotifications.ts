@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Platform, AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { PermissionStatus } from 'expo-notifications';
+import Constants from 'expo-constants';
 
 import { getPermissionStatus, requestPermission, openSettings } from '@/lib/notifications/permissions';
 import { scheduleHabitReminders, cancelHabitReminders } from '@/lib/notifications/schedule';
@@ -9,6 +10,9 @@ import { loadHabits, updateHabit } from '@/lib/habits/storage';
 import { createAndroidChannel } from '@/lib/notifications/setup';
 
 function N() {
+  if (Constants.appOwnership === 'expo') {
+    return null;
+  }
   return require('expo-notifications') as typeof import('expo-notifications');
 }
 
@@ -106,7 +110,15 @@ export function useNotifications(): UseNotificationsResult {
   // ── Refresh Scheduled Reminders ──
   const refreshScheduled = useCallback(async () => {
     try {
-      const list = await N().getAllScheduledNotificationsAsync();
+      const Notifications = N();
+      if (!Notifications) {
+        if (mountedRef.current) {
+          setScheduledCount(0);
+          setScheduledIds([]);
+        }
+        return;
+      }
+      const list = await Notifications.getAllScheduledNotificationsAsync();
       if (mountedRef.current) {
         setScheduledCount(list.length);
         setScheduledIds(list.map((item) => item.identifier));
@@ -192,6 +204,9 @@ export function useNotifications(): UseNotificationsResult {
       }
 
       const Notifications = N();
+      if (!Notifications) {
+        throw new Error('Notifications module not available in this environment.');
+      }
       await Notifications.scheduleNotificationAsync({
         content: {
           title: '🔥 Keep the chain alive!',
@@ -222,7 +237,9 @@ export function useNotifications(): UseNotificationsResult {
   // ── Debug clear all ──
   const cancelAllScheduledNotifications = useCallback(async () => {
     try {
-      await N().cancelAllScheduledNotificationsAsync();
+      const Notifications = N();
+      if (!Notifications) return;
+      await Notifications.cancelAllScheduledNotificationsAsync();
       const habits = await loadHabits();
       for (const habit of habits) {
         if (habit.notificationIds.length > 0) {
