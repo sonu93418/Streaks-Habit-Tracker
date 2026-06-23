@@ -4,17 +4,17 @@ import React, { useEffect } from 'react';
 import { Platform, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Border, Colors, NB, Shadow } from '@/constants/theme';
-import { ThreeDIcon, IconType } from '@/components/three-d-icon';
 import { useThemeContext } from '@/hooks/useTheme';
 
-function TabIcon({ name, focused }: { name: IconType; focused: boolean }) {
-  const scale = useSharedValue(focused ? 1.15 : 1);
+function TabIcon({ name, focused, color }: { name: string; focused: boolean; color: string }) {
+  const scale = useSharedValue(focused ? 1.08 : 1);
 
   useEffect(() => {
-    scale.value = withSpring(focused ? 1.15 : 1, {
-      damping: 10,
+    scale.value = withSpring(focused ? 1.08 : 1, {
+      damping: 15,
       stiffness: 150,
     });
   }, [focused, scale]);
@@ -25,16 +25,15 @@ function TabIcon({ name, focused }: { name: IconType; focused: boolean }) {
     };
   });
 
+  let iconName = '';
+  if (name === 'home') iconName = focused ? 'home' : 'home-outline';
+  else if (name === 'add') iconName = focused ? 'add-circle' : 'add-circle-outline';
+  else if (name === 'notifications') iconName = focused ? 'notifications' : 'notifications-outline';
+  else if (name === 'settings') iconName = focused ? 'settings' : 'settings-outline';
+
   return (
-    <Animated.View style={[animStyle, { height: 42, justifyContent: 'center' }]}>
-      <ThreeDIcon
-        name={name}
-        size={22}
-        showBorder={focused}
-        shadowDepth={focused ? 2.5 : 0}
-        backgroundColor={focused ? undefined : 'transparent'}
-        iconColor={focused ? undefined : '#6A6A6A'}
-      />
+    <Animated.View style={[animStyle, { height: 26, justifyContent: 'center', alignItems: 'center' }]}>
+      <Ionicons name={iconName as any} size={24} color={color} />
     </Animated.View>
   );
 }
@@ -52,10 +51,10 @@ export default function TabLayout() {
             position: 'absolute',
             left: 16,
             right: 16,
-            bottom: Math.max(insets.bottom, 10),
-            height: 76,
-            paddingBottom: Platform.OS === 'ios' ? 12 : 8,
-            paddingTop: 8,
+            bottom: Math.max(insets.bottom, 12),
+            height: 80,
+            paddingBottom: Platform.OS === 'ios' ? 16 : 10,
+            paddingTop: 10,
             backgroundColor: colors.tabBar,
             borderWidth: Border.width,
             borderColor: NB.black,
@@ -64,7 +63,7 @@ export default function TabLayout() {
             shadowColor: NB.black,
             elevation: 8,
           },
-          tabBarActiveTintColor: colors.accent,
+          tabBarActiveTintColor: colors.text,
           tabBarInactiveTintColor: colors.textSecondary,
           tabBarActiveBackgroundColor: 'transparent',
           tabBarLabel: ({ focused }) => {
@@ -78,9 +77,10 @@ export default function TabLayout() {
               <Text
                 style={{
                   fontFamily: focused ? 'PlusJakartaSans_700Bold' : 'PlusJakartaSans_500Medium',
-                  fontSize: 12,
-                  color: focused ? colors.accent : colors.textSecondary,
-                  marginTop: 2,
+                  fontSize: 11,
+                  color: focused ? colors.text : colors.textSecondary,
+                  marginTop: 4,
+                  textAlign: 'center',
                 }}
               >
                 {label}
@@ -90,7 +90,9 @@ export default function TabLayout() {
           tabBarItemStyle: {
             borderRadius: Border.radius,
             marginHorizontal: 3,
-            marginVertical: 2,
+            marginVertical: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
           },
         })}
       >
@@ -98,7 +100,7 @@ export default function TabLayout() {
           name="index"
           options={{
             title: 'Home',
-            tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
+            tabBarIcon: ({ focused, color }) => <TabIcon name="home" focused={focused} color={color} />,
           }}
         />
 
@@ -106,7 +108,7 @@ export default function TabLayout() {
           name="add"
           options={{
             title: 'Add',
-            tabBarIcon: ({ focused }) => <TabIcon name="add" focused={focused} />,
+            tabBarIcon: ({ focused, color }) => <TabIcon name="add" focused={focused} color={color} />,
           }}
         />
 
@@ -114,7 +116,7 @@ export default function TabLayout() {
           name="notifications"
           options={{
             title: 'Alerts',
-            tabBarIcon: ({ focused }) => <TabIcon name="notifications" focused={focused} />,
+            tabBarIcon: ({ focused, color }) => <TabIcon name="notifications" focused={focused} color={color} />,
           }}
         />
 
@@ -122,7 +124,7 @@ export default function TabLayout() {
           name="settings"
           options={{
             title: 'Settings',
-            tabBarIcon: ({ focused }) => <TabIcon name="settings" focused={focused} />,
+            tabBarIcon: ({ focused, color }) => <TabIcon name="settings" focused={focused} color={color} />,
           }}
         />
       </Tabs>

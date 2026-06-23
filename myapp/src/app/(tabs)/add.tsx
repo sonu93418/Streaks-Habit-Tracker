@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: Platform.OS === 'ios' ? 4 : 12,
+    paddingBottom: BottomTabInset - Spacing.two,
     borderTopWidth: 1.5,
   },
   saveBtn: {
