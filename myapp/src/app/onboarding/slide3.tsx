@@ -18,6 +18,9 @@ const STORAGE_ONBOARDING_KEY = 'streaks_onboarding_completed_v1';
 export default function OnboardingSlide3() {
   const router = useRouter();
   const theme = useTheme();
+  const isDark = theme.background === NB.darkBg;
+  const borderColor = isDark ? '#FFFFFF' : '#000000';
+  const shadowColor = isDark ? '#FFFFFF' : '#000000';
 
   const handleStart = async () => {
     try {
@@ -43,8 +46,8 @@ export default function OnboardingSlide3() {
 
             {/* Premium 3D Tile surrounding generated 3D flame image */}
             <View style={styles.imageCardContainer}>
-              <View style={styles.imageCardShadow} />
-              <View style={styles.imageCard}>
+              <View style={[styles.imageCardShadow, { backgroundColor: shadowColor }]} />
+              <View style={[styles.imageCard, { borderColor, backgroundColor: theme.card }]}>
                 <Image
                   source={require('../../../assets/images/onboarding_3.png')}
                   style={styles.illustration}
@@ -57,15 +60,16 @@ export default function OnboardingSlide3() {
           <View style={styles.footer}>
             {/* Dots */}
             <View style={styles.dotContainer}>
-              <View style={[styles.dot, { backgroundColor: theme.textSecondary + '30', width: 12 }]} />
-              <View style={[styles.dot, { backgroundColor: theme.textSecondary + '30', width: 12 }]} />
-              <View style={[styles.dot, { backgroundColor: NB.yellow, width: 24 }]} />
+              <View style={[styles.dot, { backgroundColor: theme.textSecondary + '30', width: 12, borderColor }]} />
+              <View style={[styles.dot, { backgroundColor: theme.textSecondary + '30', width: 12, borderColor }]} />
+              <View style={[styles.dot, { backgroundColor: NB.yellow, width: 24, borderColor }]} />
             </View>
 
             <Pressable3D
               onPress={handleStart}
               style={styles.nextBtnContainer}
-              contentStyle={[styles.nextBtn, { backgroundColor: NB.yellow }]}
+              contentStyle={[styles.nextBtn, { backgroundColor: NB.yellow, borderColor }]}
+              shadowColor={shadowColor}
               shadowDepth={5}
             >
               <Text style={styles.nextBtnText}>Let's Get Started →</Text>
@@ -94,7 +98,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 48,
+    gap: 24,
   },
   textContainer: {
     alignItems: 'center',
@@ -112,8 +116,8 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   imageCardContainer: {
-    width: 260,
-    height: 260,
+    width: 200,
+    height: 200,
     position: 'relative',
     marginTop: 10,
   },
@@ -123,23 +127,20 @@ const styles = StyleSheet.create({
     left: 6,
     right: -6,
     bottom: -6,
-    backgroundColor: '#000000',
     borderRadius: Border.radiusLg,
   },
   imageCard: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#FAF2DC',
     borderWidth: Border.width,
-    borderColor: '#000000',
     borderRadius: Border.radiusLg,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
   illustration: {
-    width: '90%',
-    height: '90%',
+    width: '85%',
+    height: '85%',
   },
   footer: {
     gap: 28,
@@ -155,7 +156,6 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#000000',
   },
   nextBtnContainer: {
     width: '100%',
@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
   nextBtn: {
     height: 60,
     borderWidth: Border.width,
-    borderColor: '#000000',
     borderRadius: Border.radiusLg,
     alignItems: 'center',
     justifyContent: 'center',
