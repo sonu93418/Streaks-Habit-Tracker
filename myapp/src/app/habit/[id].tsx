@@ -135,7 +135,7 @@ export default function HabitDetailScreen() {
             style={[
               styles.heroCard,
               {
-                backgroundColor: isDoneToday ? NB.green : NB.yellow,
+                backgroundColor: isDoneToday ? NB.green : (habit.color || NB.yellow),
                 borderColor: NB.black,
                 ...Shadow.large,
                 shadowColor: NB.black,

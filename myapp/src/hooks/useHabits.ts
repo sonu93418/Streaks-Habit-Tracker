@@ -124,6 +124,8 @@ export function useHabits() {
       notificationIds: [],
       streak: 0,
       lastCompletedISO: null,
+      category: formData.category,
+      color: formData.color,
     };
 
     await addHabit(habit);
@@ -160,6 +162,8 @@ export function useHabits() {
       emoji: formData.emoji,
       frequency: formData.frequency,
       notificationIds: [],
+      category: formData.category,
+      color: formData.color,
     };
 
     try {

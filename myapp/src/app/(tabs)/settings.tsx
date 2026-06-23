@@ -320,6 +320,13 @@ export default function SettingsScreen() {
                 </Pressable3D>
               </>
             )}
+
+            <View style={styles.divider} />
+            <Text style={[styles.cardSubText, { color: theme.textSecondary, marginTop: 4, fontStyle: 'italic' }]}>
+              {permissionStatus === 'granted' && remindersEnabled
+                ? '🔔 Local reminders are active. You will receive notifications at each habit\'s scheduled time.'
+                : '🔕 Local reminders are currently inactive. You will not receive any habit alerts.'}
+            </Text>
           </View>
 
           {/* ══ HABIT PREFERENCES ═══════════════════════════════════════════ */}

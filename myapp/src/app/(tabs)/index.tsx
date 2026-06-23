@@ -18,10 +18,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { HabitCard } from '@/components/habit-card';
-import { PermissionBanner } from '@/components/permission-banner';
 import { Border, BottomTabInset, NB, Shadow, Spacing, Typography } from '@/constants/theme';
 import { useHabits } from '@/hooks/useHabits';
-import { useNotifications } from '@/hooks/useNotifications';
 import { useTheme } from '@/hooks/useTheme';
 import { habitIsActiveToday, today } from '@/lib/habits/types';
 import { Pressable3D } from '@/components/pressable-3d';
@@ -38,7 +36,6 @@ export default function TodayScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { habits, isLoading, isRefreshing, refresh, markDone, error } = useHabits();
-  const { permissionStatus, requestPermission, openSettings } = useNotifications();
 
   const [confettiActive, setConfettiActive] = useState(false);
 
@@ -161,13 +158,7 @@ export default function TodayScreen() {
           </View>
         )}
 
-        {permissionStatus !== 'granted' && (
-          <PermissionBanner
-            status={permissionStatus as 'denied' | 'undetermined' | null}
-            onRequest={requestPermission}
-            onOpenSettings={openSettings}
-          />
-        )}
+
 
         {error && (
           <View style={[styles.errorBox, { borderColor: NB.black, backgroundColor: NB.coral }]}>

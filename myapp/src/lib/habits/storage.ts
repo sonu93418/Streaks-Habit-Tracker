@@ -36,7 +36,9 @@ function isHabit(value: unknown): value is Habit {
     Array.isArray(habit.notificationIds) &&
     habit.notificationIds.every((id) => typeof id === 'string') &&
     typeof habit.streak === 'number' &&
-    (habit.lastCompletedISO === null || typeof habit.lastCompletedISO === 'string')
+    (habit.lastCompletedISO === null || typeof habit.lastCompletedISO === 'string') &&
+    (habit.category === undefined || typeof habit.category === 'string') &&
+    (habit.color === undefined || typeof habit.color === 'string')
   );
 }
 

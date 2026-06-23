@@ -24,6 +24,24 @@ import { Frequency } from '@/lib/habits/types';
 const DEFAULT_FREQUENCY: Frequency = { kind: 'daily', hour: 8, minute: 0 };
 const DEFAULT_EMOJI = '💧';
 
+const CATEGORIES = [
+  { name: 'Health', emoji: '🍎', color: '#4ADE80' },
+  { name: 'Fitness', emoji: '🏋️', color: '#FF6B6B' },
+  { name: 'Study', emoji: '📚', color: '#BE4BDB' },
+  { name: 'Productivity', emoji: '🎯', color: '#FFD400' },
+  { name: 'Sleep', emoji: '🌙', color: '#60A5FA' },
+  { name: 'Custom', emoji: '✨', color: '#FAF2DC' },
+];
+
+const COLORS = [
+  { label: 'Yellow', value: '#FFD400' },
+  { label: 'Coral', value: '#FF6B6B' },
+  { label: 'Green', value: '#4ADE80' },
+  { label: 'Lilac', value: '#BE4BDB' },
+  { label: 'Blue', value: '#60A5FA' },
+  { label: 'Cream', value: '#FAF2DC' },
+];
+
 function getParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -45,6 +63,8 @@ export default function NewHabitScreen() {
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState(DEFAULT_EMOJI);
   const [frequency, setFrequency] = useState<Frequency>(DEFAULT_FREQUENCY);
+  const [category, setCategory] = useState('Custom');
+  const [color, setColor] = useState('#FFD400');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -52,7 +72,15 @@ export default function NewHabitScreen() {
     setName(existingHabit.name);
     setEmoji(existingHabit.emoji);
     setFrequency(existingHabit.frequency);
+    if (existingHabit.category) setCategory(existingHabit.category);
+    if (existingHabit.color) setColor(existingHabit.color);
   }, [existingHabit]);
+
+  const handleSelectCategory = (cat: typeof CATEGORIES[number]) => {
+    setCategory(cat.name);
+    setEmoji(cat.emoji);
+    setColor(cat.color);
+  };
 
   const validate = (): boolean => {
     const trimmedName = name.trim();
@@ -76,7 +104,7 @@ export default function NewHabitScreen() {
 
     setIsSaving(true);
     try {
-      const formData = { name: name.trim(), emoji, frequency };
+      const formData = { name: name.trim(), emoji, frequency, category, color };
       if (isEditing) {
         if (!editId) throw new Error('Missing edit id.');
         await editHabit(editId, formData);
@@ -116,12 +144,16 @@ export default function NewHabitScreen() {
     );
   }
 
+  const isNameEmpty = !name.trim();
+
   return (
     <KeyboardAvoidingView
       style={[styles.root, { backgroundColor: theme.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-      <SafeAreaView style={styles.safe} edges={['top']}>
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => router.back()}
@@ -136,18 +168,21 @@ export default function NewHabitScreen() {
           <View style={{ width: 48 }} />
         </View>
 
+        {/* Scrollable Form Content */}
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.scrollContent}
         >
+          {/* Accent Color Themed Preview */}
           <View
             style={[
               styles.preview,
               {
-                backgroundColor: NB.yellow,
+                backgroundColor: color,
                 borderColor: NB.black,
-                ...Shadow.large,
+                borderWidth: Border.width,
+                ...Shadow.medium,
                 shadowColor: NB.black,
               },
             ]}
@@ -156,11 +191,17 @@ export default function NewHabitScreen() {
             <Text style={styles.previewName} numberOfLines={1}>
               {name.trim() || 'Your Habit Name'}
             </Text>
+            {category !== 'Custom' && (
+              <View style={styles.previewCategory}>
+                <Text style={styles.previewCategoryText}>{category.toUpperCase()}</Text>
+              </View>
+            )}
           </View>
 
+          {/* Name Input */}
           <View style={styles.section}>
             <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-              NAME
+              HABIT NAME
             </Text>
             <View
               style={[
@@ -177,7 +218,7 @@ export default function NewHabitScreen() {
                 style={[styles.input, { color: theme.text }]}
                 value={name}
                 onChangeText={setName}
-                placeholder="e.g. Drink Water, Read, Workout..."
+                placeholder="e.g. Drink Water"
                 placeholderTextColor={theme.textSecondary}
                 maxLength={40}
                 returnKeyType="done"
@@ -186,14 +227,85 @@ export default function NewHabitScreen() {
             </View>
           </View>
 
+          {/* Category Chips */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+              CATEGORY
+            </Text>
+            <View style={styles.categoryRow}>
+              {CATEGORIES.map((cat) => {
+                const isSelected = category === cat.name;
+                return (
+                  <TouchableOpacity
+                    key={cat.name}
+                    onPress={() => handleSelectCategory(cat)}
+                    style={[
+                      styles.categoryChip,
+                      {
+                        backgroundColor: isSelected ? cat.color : theme.card,
+                        borderColor: isSelected ? NB.black : theme.border,
+                        borderWidth: isSelected ? 2.5 : 1.5,
+                      },
+                    ]}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.categoryChipEmoji}>{cat.emoji}</Text>
+                    <Text
+                      style={[
+                        styles.categoryChipText,
+                        {
+                          color: isSelected ? NB.black : theme.text,
+                          fontFamily: isSelected ? 'PlusJakartaSans_700Bold' : 'PlusJakartaSans_500Medium',
+                        },
+                      ]}
+                    >
+                      {cat.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Color Accent Picker */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+              CARD ACCENT COLOR
+            </Text>
+            <View style={styles.colorPickerRow}>
+              {COLORS.map((col) => {
+                const isSelected = color === col.value;
+                return (
+                  <TouchableOpacity
+                    key={col.value}
+                    onPress={() => setColor(col.value)}
+                    style={[
+                      styles.colorPill,
+                      {
+                        backgroundColor: col.value,
+                        borderColor: isSelected ? NB.black : 'rgba(0,0,0,0.15)',
+                        borderWidth: isSelected ? 3.5 : 1.5,
+                        transform: [{ scale: isSelected ? 1.15 : 1 }],
+                      },
+                    ]}
+                    activeOpacity={0.7}
+                  />
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Emoji Picker Component */}
           <View style={styles.section}>
             <EmojiPicker selected={emoji} onSelect={setEmoji} />
           </View>
 
+          {/* Frequency & Time Picker Component */}
           <View style={styles.section}>
             <FrequencyPicker frequency={frequency} onChange={setFrequency} />
           </View>
 
+          {/* Notice box */}
           <View
             style={[
               styles.noticeBox,
@@ -203,33 +315,38 @@ export default function NewHabitScreen() {
             <Text style={styles.noticeIcon}>🔔</Text>
             <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
               {isEditing
-                ? 'Existing reminders will be cancelled and rescheduled after saving.'
-                : 'Reminders are scheduled after the habit is saved. Permission denial will not block saving.'}
+                ? 'Existing reminders will be rescheduled for the new time.'
+                : 'Reminders are scheduled after saving. Local reminder settings can be updated anytime.'}
             </Text>
           </View>
 
+          <View style={{ height: Spacing.four }} />
+        </ScrollView>
+
+        {/* Sticky Save Button Footer */}
+        <View style={[styles.footer, { borderTopColor: theme.border, backgroundColor: theme.background }]}>
           <Pressable
             onPress={handleSave}
-            disabled={isSaving || (isEditing && isLoading)}
+            disabled={isSaving || isNameEmpty || (isEditing && isLoading)}
             style={({ pressed }: { pressed: boolean }) => [
               styles.saveBtn,
               {
-                backgroundColor: isSaving ? theme.card : NB.yellow,
-                borderColor: NB.black,
+                backgroundColor: isNameEmpty ? theme.backgroundSelected : color,
+                borderColor: isNameEmpty ? theme.border : NB.black,
+                opacity: isSaving ? 0.7 : 1,
+                transform: [{ translateX: pressed && !isNameEmpty ? 3 : 0 }, { translateY: pressed && !isNameEmpty ? 3 : 0 }],
+              },
+              !isNameEmpty && {
                 ...Shadow.large,
                 shadowColor: NB.black,
-                opacity: isSaving ? 0.7 : 1,
-                transform: [{ translateX: pressed ? 3 : 0 }, { translateY: pressed ? 3 : 0 }],
               },
             ]}
           >
-            <Text style={styles.saveBtnText}>
+            <Text style={[styles.saveBtnText, { color: isNameEmpty ? theme.textSecondary : NB.black }]}>
               {isSaving ? 'Saving...' : isEditing ? 'Save Changes' : '+ Create Habit'}
             </Text>
           </Pressable>
-
-          <View style={{ height: BottomTabInset + Spacing.four }} />
-        </ScrollView>
+        </View>
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -268,9 +385,8 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   preview: {
-    borderWidth: 3,
     borderRadius: Border.radiusLg,
-    padding: 24,
+    padding: 20,
     alignItems: 'center',
     gap: 8,
   },
@@ -280,14 +396,25 @@ const styles = StyleSheet.create({
     color: NB.black,
     textAlign: 'center',
   },
+  previewCategory: {
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  previewCategoryText: {
+    fontSize: 10,
+    fontFamily: 'PlusJakartaSans_700Bold',
+    color: NB.black,
+    letterSpacing: 0.5,
+  },
   section: {
-    gap: 0,
+    gap: 8,
   },
   sectionLabel: {
     ...Typography.caption,
     fontFamily: 'PlusJakartaSans_700Bold',
     letterSpacing: 1.2,
-    marginBottom: 8,
   },
   inputWrapper: {
     borderWidth: 2.5,
@@ -298,6 +425,36 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans_500Medium',
     paddingHorizontal: 16,
     paddingVertical: 15,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: Border.radiusSm,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  categoryChipEmoji: {
+    fontSize: 15,
+  },
+  categoryChipText: {
+    fontSize: 13,
+  },
+  colorPickerRow: {
+    flexDirection: 'row',
+    gap: Spacing.three,
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  colorPill: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
   },
   noticeBox: {
     flexDirection: 'row',
@@ -314,15 +471,20 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans_500Medium',
     lineHeight: 18,
   },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === 'ios' ? 4 : 12,
+    borderTopWidth: 1.5,
+  },
   saveBtn: {
-    borderWidth: 3,
+    borderWidth: Border.width,
     borderRadius: Border.radius,
-    paddingVertical: 18,
+    paddingVertical: 16,
     alignItems: 'center',
   },
   saveBtnText: {
     ...Typography.button,
-    color: NB.black,
   },
   missingState: {
     flex: 1,

@@ -76,13 +76,18 @@ export function HabitCard({ habit, onPress, onMarkDone }: Props) {
     };
   });
 
+  const hasCustomColor = !isDoneToday && Boolean(habit.color);
+  const cardBg = isDoneToday ? '#EDFDF4' : (habit.color || theme.card);
+  const nameColor = isDoneToday ? '#1E8F4E' : (hasCustomColor ? '#000000' : theme.text);
+  const freqColor = isDoneToday ? '#1E8F4E' : (hasCustomColor ? '#333333' : theme.textSecondary);
+
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
         {
-          backgroundColor: isDoneToday ? '#EDFDF4' : theme.card, // soft success green background if completed
+          backgroundColor: cardBg,
           borderColor: NB.black,
           borderWidth: Border.width,
           ...Shadow.medium,
@@ -107,7 +112,7 @@ export function HabitCard({ habit, onPress, onMarkDone }: Props) {
             style={[
               styles.name,
               {
-                color: isDoneToday ? '#1E8F4E' : theme.text,
+                color: nameColor,
                 textDecorationLine: isDoneToday ? 'line-through' : 'none',
               },
             ]}
@@ -119,7 +124,7 @@ export function HabitCard({ habit, onPress, onMarkDone }: Props) {
           <Text
             style={[
               styles.frequency,
-              { color: isDoneToday ? '#1E8F4E' : theme.textSecondary },
+              { color: freqColor },
             ]}
             numberOfLines={1}
           >
@@ -130,9 +135,18 @@ export function HabitCard({ habit, onPress, onMarkDone }: Props) {
             {/* Streak count pill */}
             <View style={[styles.metaPill, { borderColor: NB.black, backgroundColor: NB.yellow }]}>
               <Text style={styles.metaText}>
-                🔥 {habit.streak} {habit.streak === 1 ? 'Day' : 'Day'} Streak
+                🔥 {habit.streak} Day Streak
               </Text>
             </View>
+
+            {habit.category && (
+              <View style={[styles.metaPill, { borderColor: NB.black, backgroundColor: 'rgba(0,0,0,0.06)' }]}>
+                <Text style={[styles.metaText, { fontFamily: 'PlusJakartaSans_700Bold' }]}>
+                  📂 {habit.category}
+                </Text>
+              </View>
+            )}
+
             {!isActiveToday && (
               <View style={[styles.metaPill, { borderColor: NB.black, backgroundColor: NB.coral }]}>
                 <Text style={styles.metaText}>Not today</Text>

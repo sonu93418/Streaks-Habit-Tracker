@@ -14,12 +14,16 @@ export type Habit = {
   notificationIds: string[];
   streak: number;
   lastCompletedISO: string | null; // ISO date string YYYY-MM-DD
+  category?: string;
+  color?: string;
 };
 
 export type HabitFormData = {
   name: string;
   emoji: string;
   frequency: Frequency;
+  category?: string;
+  color?: string;
 };
 
 /** Returns a YYYY-MM-DD string for a given Date (local time) */
@@ -55,7 +59,9 @@ export function habitIsActiveToday(habit: Habit): boolean {
 /** Human-readable frequency summary */
 export function frequencySummary(freq: Frequency): string {
   const pad = (n: number) => String(n).padStart(2, '0');
-  const time = `${pad(freq.hour)}:${pad(freq.minute)}`;
+  const ampm = freq.hour >= 12 ? 'PM' : 'AM';
+  const displayHour = freq.hour % 12 === 0 ? 12 : freq.hour % 12;
+  const time = `${pad(displayHour)}:${pad(freq.minute)} ${ampm}`;
   if (freq.kind === 'daily') {
     return `Every day at ${time}`;
   }
