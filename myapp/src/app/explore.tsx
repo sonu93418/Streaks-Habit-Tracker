@@ -11,5 +11,5 @@ import { Redirect } from 'expo-router';
 
 export default function ExploreScreen() {
   // Redirect to Today screen — explore is not used in Streaks
-  return <Redirect href={"/(tabs)/" as any} />;
+  return <Redirect href={"/(tabs)" as any} />;
 }

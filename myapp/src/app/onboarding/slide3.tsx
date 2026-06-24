@@ -4,8 +4,8 @@ import {
   View,
   Text,
   Image,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -25,10 +25,10 @@ export default function OnboardingSlide3() {
   const handleStart = async () => {
     try {
       await AsyncStorage.setItem(STORAGE_ONBOARDING_KEY, 'true');
-      router.replace('/(tabs)/' as any);
+      router.replace('/(tabs)' as any);
     } catch (err) {
       console.warn('Failed to save onboarding completion state:', err);
-      router.replace('/(tabs)/' as any);
+      router.replace('/(tabs)' as any);
     }
   };
 
@@ -38,9 +38,9 @@ export default function OnboardingSlide3() {
         <View style={styles.content}>
           <View style={styles.slide}>
             <View style={styles.textContainer}>
-              <Text style={[styles.title, { color: theme.text }]}>Stay on Streak</Text>
+              <Text style={[styles.title, { color: theme.text }]}>Keep Your Streak Alive</Text>
               <Text style={[styles.description, { color: theme.textSecondary }]}>
-                Don't break the chain! Keep your flame alive and feel the progress.
+                Complete habits daily and grow your streak.
               </Text>
             </View>
 
@@ -68,7 +68,7 @@ export default function OnboardingSlide3() {
             <Pressable3D
               onPress={handleStart}
               style={styles.nextBtnContainer}
-              contentStyle={[styles.nextBtn, { backgroundColor: NB.yellow, borderColor }]}
+              contentStyle={[styles.nextBtn, { backgroundColor: NB.green, borderColor }]}
               shadowColor={shadowColor}
               shadowDepth={5}
             >

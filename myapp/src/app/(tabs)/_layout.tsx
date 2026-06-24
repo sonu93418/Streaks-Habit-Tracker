@@ -10,10 +10,10 @@ import { Border, Colors, NB, Shadow } from '@/constants/theme';
 import { useThemeContext } from '@/hooks/useTheme';
 
 function TabIcon({ name, focused, color }: { name: string; focused: boolean; color: string }) {
-  const scale = useSharedValue(focused ? 1.08 : 1);
+  const scale = useSharedValue(focused ? 1.1 : 1);
 
   useEffect(() => {
-    scale.value = withSpring(focused ? 1.08 : 1, {
+    scale.value = withSpring(focused ? 1.1 : 1, {
       damping: 15,
       stiffness: 150,
     });
@@ -32,8 +32,8 @@ function TabIcon({ name, focused, color }: { name: string; focused: boolean; col
   else if (name === 'settings') iconName = focused ? 'settings' : 'settings-outline';
 
   return (
-    <Animated.View style={[animStyle, { height: 26, justifyContent: 'center', alignItems: 'center' }]}>
-      <Ionicons name={iconName as any} size={24} color={color} />
+    <Animated.View style={[animStyle, { height: 28, justifyContent: 'center', alignItems: 'center' }]}>
+      <Ionicons name={iconName as any} size={26} color={color} />
     </Animated.View>
   );
 }
@@ -41,6 +41,9 @@ function TabIcon({ name, focused, color }: { name: string; focused: boolean; col
 export default function TabLayout() {
   const { colors, isDark } = useThemeContext();
   const insets = useSafeAreaInsets();
+
+  const activeColor = isDark ? colors.accent : '#C09000';
+  const inactiveColor = colors.textSecondary;
 
   return (
     <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
@@ -57,14 +60,14 @@ export default function TabLayout() {
             paddingTop: 10,
             backgroundColor: colors.tabBar,
             borderWidth: Border.width,
-            borderColor: NB.black,
-            borderRadius: Border.radiusLg,
+            borderColor: isDark ? '#FFFFFF' : '#000000',
+            borderRadius: 24,
             ...Shadow.large,
-            shadowColor: NB.black,
+            shadowColor: isDark ? '#FFFFFF' : '#000000',
             elevation: 8,
           },
-          tabBarActiveTintColor: colors.text,
-          tabBarInactiveTintColor: colors.textSecondary,
+          tabBarActiveTintColor: activeColor,
+          tabBarInactiveTintColor: inactiveColor,
           tabBarActiveBackgroundColor: 'transparent',
           tabBarLabel: ({ focused }) => {
             let label = '';
@@ -77,8 +80,8 @@ export default function TabLayout() {
               <Text
                 style={{
                   fontFamily: focused ? 'PlusJakartaSans_700Bold' : 'PlusJakartaSans_500Medium',
-                  fontSize: 11,
-                  color: focused ? colors.text : colors.textSecondary,
+                  fontSize: 12,
+                  color: focused ? activeColor : inactiveColor,
                   marginTop: 4,
                   textAlign: 'center',
                 }}
@@ -88,9 +91,7 @@ export default function TabLayout() {
             );
           },
           tabBarItemStyle: {
-            borderRadius: Border.radius,
-            marginHorizontal: 3,
-            marginVertical: 1,
+            height: '100%',
             justifyContent: 'center',
             alignItems: 'center',
           },

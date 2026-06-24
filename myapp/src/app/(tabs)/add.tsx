@@ -111,7 +111,7 @@ export default function NewHabitScreen() {
       } else {
         await createHabit(formData);
       }
-      router.replace('/(tabs)/' as any);
+      router.replace('/(tabs)' as any);
     } catch (error) {
       console.warn('[new] Failed to save habit:', error);
       Alert.alert('Could not save habit', 'Please try again.');
@@ -133,7 +133,7 @@ export default function NewHabitScreen() {
               This habit may have been deleted.
             </Text>
             <TouchableOpacity
-              onPress={() => router.replace('/(tabs)/' as any)}
+              onPress={() => router.replace('/(tabs)' as any)}
               style={[styles.saveBtn, { backgroundColor: NB.yellow, borderColor: NB.black }]}
             >
               <Text style={styles.saveBtnText}>Back Home</Text>

@@ -186,6 +186,31 @@ export default function SettingsScreen() {
     );
   };
 
+  const handleResetOnboarding = () => {
+    Alert.alert(
+      'Reset Onboarding? 🔄',
+      'This will reset the onboarding walkthrough state and take you back to the welcome screen.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('streaks_onboarding_completed_v1');
+              if (typeof global !== 'undefined') {
+                (global as any).isAppInitialized = undefined;
+              }
+              router.replace('/' as any);
+            } catch (err) {
+              console.warn('Failed to reset onboarding:', err);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safe} edges={['top']}>
@@ -423,6 +448,14 @@ export default function SettingsScreen() {
             {/* Support Row */}
             <TouchableOpacity onPress={handleShowSupport} style={styles.aboutLinkRow}>
               <Text style={[styles.aboutLinkText, { color: theme.text }]}>📧 Contact Support</Text>
+              <Text style={[styles.aboutArrow, { color: theme.textSecondary }]}>→</Text>
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            {/* Reset Onboarding Row */}
+            <TouchableOpacity onPress={handleResetOnboarding} style={styles.aboutLinkRow}>
+              <Text style={[styles.aboutLinkText, { color: NB.coral }]}>🔄 Reset Onboarding</Text>
               <Text style={[styles.aboutArrow, { color: theme.textSecondary }]}>→</Text>
             </TouchableOpacity>
           </View>

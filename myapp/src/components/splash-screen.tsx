@@ -21,7 +21,7 @@ import { useTheme } from '@/hooks/useTheme';
 
 const STORAGE_ONBOARDING_KEY = 'streaks_onboarding_completed_v1';
 
-export default function SplashScreenComponent() {
+export default function SplashScreenComponent({ onFinish }: { onFinish?: () => void }) {
   const router = useRouter();
   const theme = useTheme();
 
@@ -61,21 +61,25 @@ export default function SplashScreenComponent() {
 
   useEffect(() => {
     const routeTimer = setTimeout(async () => {
-      try {
-        const completed = await AsyncStorage.getItem(STORAGE_ONBOARDING_KEY);
-        if (completed === 'true') {
-          router.replace('/(tabs)' as any);
-        } else {
+      if (onFinish) {
+        onFinish();
+      } else {
+        try {
+          const completed = await AsyncStorage.getItem(STORAGE_ONBOARDING_KEY);
+          if (completed === 'true') {
+            router.replace('/(tabs)' as any);
+          } else {
+            router.replace('/onboarding' as any);
+          }
+        } catch (err) {
+          console.warn('Failed to read onboarding state in splash:', err);
           router.replace('/onboarding' as any);
         }
-      } catch (err) {
-        console.warn('Failed to read onboarding state in splash:', err);
-        router.replace('/onboarding' as any);
       }
     }, 1800);
 
     return () => clearTimeout(routeTimer);
-  }, [router]);
+  }, [router, onFinish]);
 
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>

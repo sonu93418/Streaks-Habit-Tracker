@@ -4,8 +4,8 @@ import {
   View,
   Text,
   Image,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { Pressable3D } from '@/components/pressable-3d';
@@ -29,11 +29,9 @@ export default function OnboardingSlide1() {
         <View style={styles.content}>
           <View style={styles.slide}>
             <View style={styles.textContainer}>
-              <Text style={[styles.title, { color: theme.text }]}>
-                Welcome to <Text style={styles.boldTitle}>Streaks</Text>
-              </Text>
+              <Text style={[styles.title, { color: theme.text }]}>Welcome to Streaks</Text>
               <Text style={[styles.description, { color: theme.textSecondary }]}>
-                Build healthy habits, stay consistent, and celebrate every milestone.
+                Build better habits every day.
               </Text>
             </View>
 
@@ -101,10 +99,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.screenTitle,
     textAlign: 'center',
-  },
-  boldTitle: {
-    ...Typography.hero,
-    color: NB.yellowDark,
   },
   description: {
     ...Typography.body,

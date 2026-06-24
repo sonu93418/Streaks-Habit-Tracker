@@ -4,8 +4,8 @@ import {
   View,
   Text,
   Image,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { Pressable3D } from '@/components/pressable-3d';
@@ -29,9 +29,9 @@ export default function OnboardingSlide2() {
         <View style={styles.content}>
           <View style={styles.slide}>
             <View style={styles.textContainer}>
-              <Text style={[styles.title, { color: theme.text }]}>Track Habits</Text>
+              <Text style={[styles.title, { color: theme.text }]}>Track Your Progress</Text>
               <Text style={[styles.description, { color: theme.textSecondary }]}>
-                Create habits, configure daily reminders, and track your daily progress.
+                Stay organized and never miss a habit.
               </Text>
             </View>
 

@@ -50,7 +50,7 @@ export default function HabitDetailScreen() {
           onPress: async () => {
             try {
               await removeHabit(habit.id);
-              router.replace('/(tabs)/' as any);
+              router.replace('/(tabs)' as any);
             } catch (error) {
               console.warn('[habit] Failed to delete habit:', error);
               Alert.alert('Could not delete habit', 'Please try again.');
@@ -76,7 +76,7 @@ export default function HabitDetailScreen() {
       <View style={[styles.root, { backgroundColor: theme.background }]}>
         <SafeAreaView style={styles.safe}>
           <TouchableOpacity
-            onPress={() => router.replace('/(tabs)/' as any)}
+            onPress={() => router.replace('/(tabs)' as any)}
             style={[styles.backBtn, { borderColor: theme.border, backgroundColor: theme.card }]}
             activeOpacity={0.8}
           >
@@ -101,7 +101,7 @@ export default function HabitDetailScreen() {
                   shadowColor: NB.black,
                 },
               ]}
-              onPress={() => router.replace('/(tabs)/' as any)}
+              onPress={() => router.replace('/(tabs)' as any)}
               activeOpacity={0.8}
             >
               <Text style={styles.goHomeBtnText}>Go Home</Text>

@@ -9,6 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -38,6 +39,21 @@ export default function TodayScreen() {
   const { habits, isLoading, isRefreshing, refresh, markDone, error } = useHabits();
 
   const [confettiActive, setConfettiActive] = useState(false);
+
+  // Redirection check for onboarding completion on startup
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const completed = await AsyncStorage.getItem('streaks_onboarding_completed_v1');
+        if (completed !== 'true') {
+          router.replace('/onboarding' as any);
+        }
+      } catch (err) {
+        router.replace('/onboarding' as any);
+      }
+    };
+    checkOnboarding();
+  }, [router]);
 
   // Pulsing animation for the streak flame icon
   const flameScale = useSharedValue(1);
