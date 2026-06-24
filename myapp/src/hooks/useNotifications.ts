@@ -207,11 +207,41 @@ export function useNotifications(): UseNotificationsResult {
       if (!Notifications) {
         throw new Error('Notifications module not available in this environment.');
       }
+
+      const testTemplates = [
+        {
+          title: '💧 Time to Hydrate!',
+          body: 'Stay healthy—drink a glass of water and keep your streak alive! 💧',
+        },
+        {
+          title: '💻 Coding Time!',
+          body: 'Open your editor and write some code. Every line counts! 🚀',
+        },
+        {
+          title: '📚 Reading Reminder',
+          body: 'Pick up your book and read for a few minutes today. 📖',
+        },
+        {
+          title: '🏃 Time to Move!',
+          body: 'A quick workout today keeps your fitness streak strong. 💪',
+        },
+        {
+          title: '🧘 Find Your Calm',
+          body: 'Take a few peaceful minutes to meditate and relax. 🧘',
+        },
+        {
+          title: '🎯 Don\'t Break Your Streak!',
+          body: 'Complete today\'s habit and continue your amazing progress! 🔥',
+        }
+      ];
+      const template = testTemplates[Math.floor(Math.random() * testTemplates.length)];
+
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '🔥 Keep the chain alive!',
-          body: 'This is a test notification from Streaks Habit Tracker.',
+          title: template.title,
+          body: template.body,
           sound: 'default',
+          priority: 'high',
           data: {
             screen: '/habit',
             habitId: 'test_habit_id',
