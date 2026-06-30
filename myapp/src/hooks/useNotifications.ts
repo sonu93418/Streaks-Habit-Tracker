@@ -7,13 +7,15 @@ import Constants from 'expo-constants';
 import { getPermissionStatus, requestPermission, openSettings } from '@/lib/notifications/permissions';
 import { scheduleHabitReminders, cancelHabitReminders } from '@/lib/notifications/schedule';
 import { loadHabits, updateHabit } from '@/lib/habits/storage';
-import { createAndroidChannel } from '@/lib/notifications/setup';
+import { createAndroidChannel, isAndroidExpoGo } from '@/lib/notifications/setup';
 
 function N() {
-  if (Constants.appOwnership === 'expo') {
+  try {
+    return require('expo-notifications') as typeof import('expo-notifications');
+  } catch (err) {
+    console.warn('[useNotifications] Failed to require expo-notifications:', err);
     return null;
   }
-  return require('expo-notifications') as typeof import('expo-notifications');
 }
 
 const REMINDERS_ENABLED_KEY = 'streaks_reminders_enabled_v1';
@@ -58,6 +60,27 @@ export function useNotifications(): UseNotificationsResult {
     return () => {
       mountedRef.current = false;
     };
+  }, []);
+
+  // ── Refresh Scheduled Reminders ──
+  const refreshScheduled = useCallback(async () => {
+    try {
+      const Notifications = N();
+      if (!Notifications) {
+        if (mountedRef.current) {
+          setScheduledCount(0);
+          setScheduledIds([]);
+        }
+        return;
+      }
+      const list = await Notifications.getAllScheduledNotificationsAsync();
+      if (mountedRef.current) {
+        setScheduledCount(list.length);
+        setScheduledIds(list.map((item) => item.identifier));
+      }
+    } catch (error) {
+      console.warn('[useNotifications] refreshScheduled error:', error);
+    }
   }, []);
 
   // ── Load Initial Configuration ──
@@ -105,33 +128,15 @@ export function useNotifications(): UseNotificationsResult {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  // ── Refresh Scheduled Reminders ──
-  const refreshScheduled = useCallback(async () => {
-    try {
-      const Notifications = N();
-      if (!Notifications) {
-        if (mountedRef.current) {
-          setScheduledCount(0);
-          setScheduledIds([]);
-        }
-        return;
-      }
-      const list = await Notifications.getAllScheduledNotificationsAsync();
-      if (mountedRef.current) {
-        setScheduledCount(list.length);
-        setScheduledIds(list.map((item) => item.identifier));
-      }
-    } catch (error) {
-      console.warn('[useNotifications] refreshScheduled error:', error);
-    }
-  }, []);
+  }, [refreshScheduled]);
 
   // ── Handle Permission Requests ──
   const handleRequestPermission = useCallback(async () => {
     setIsLoadingPermission(true);
-    await createAndroidChannel();
+    // createAndroidChannel uses lazy require — guard it on Android Expo Go
+    if (!isAndroidExpoGo()) {
+      await createAndroidChannel();
+    }
     const s = await requestPermission();
     if (mountedRef.current) {
       setPermissionStatus(s);
@@ -208,47 +213,26 @@ export function useNotifications(): UseNotificationsResult {
         throw new Error('Notifications module not available in this environment.');
       }
 
-      const testTemplates = [
-        {
-          title: '💧 Time to Hydrate!',
-          body: 'Stay healthy—drink a glass of water and keep your streak alive! 💧',
-        },
-        {
-          title: '💻 Coding Time!',
-          body: 'Open your editor and write some code. Every line counts! 🚀',
-        },
-        {
-          title: '📚 Reading Reminder',
-          body: 'Pick up your book and read for a few minutes today. 📖',
-        },
-        {
-          title: '🏃 Time to Move!',
-          body: 'A quick workout today keeps your fitness streak strong. 💪',
-        },
-        {
-          title: '🧘 Find Your Calm',
-          body: 'Take a few peaceful minutes to meditate and relax. 🧘',
-        },
-        {
-          title: '🎯 Don\'t Break Your Streak!',
-          body: 'Complete today\'s habit and continue your amazing progress! 🔥',
-        }
-      ];
-      const template = testTemplates[Math.floor(Math.random() * testTemplates.length)];
+      console.log({
+        title: '🧪 Test Notification',
+        body: 'This is a test reminder. If you can read this message and hear a sound, notifications are configured correctly.',
+        sound: 'default',
+      });
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: template.title,
-          body: template.body,
+          title: '🧪 Test Notification',
+          body: 'This is a test reminder. If you can read this message and hear a sound, notifications are configured correctly.',
           sound: 'default',
-          priority: 'high',
           data: {
             screen: '/habit',
             habitId: 'test_habit_id',
           },
         },
         trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
           seconds,
+          channelId: 'habit-reminders',
         } as any,
       });
 
@@ -300,7 +284,7 @@ export function useNotifications(): UseNotificationsResult {
 
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     return () => {
-      subscription.remove();
+      subscription?.remove?.();
     };
   }, [refreshScheduled]);
 

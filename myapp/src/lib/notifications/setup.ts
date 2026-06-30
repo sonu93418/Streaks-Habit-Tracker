@@ -33,10 +33,12 @@ export function isAndroidExpoGo(): boolean {
 
 /** Lazy accessor — never called at module level, only inside function bodies. */
 function N() {
-  if (Constants.appOwnership === 'expo') {
+  try {
+    return require('expo-notifications') as typeof import('expo-notifications');
+  } catch (err) {
+    console.warn('[setup] Failed to require expo-notifications:', err);
     return null;
   }
-  return require('expo-notifications') as typeof import('expo-notifications');
 }
 
 // ─── Android Channel ──────────────────────────────────────────────────────────
@@ -58,10 +60,12 @@ export async function createAndroidChannel(): Promise<void> {
     if (!Notifications) return;
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
       name: 'Habit Reminders',
-      importance: Notifications.AndroidImportance.HIGH,
+      importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FFE600',
       sound: 'default',
+      enableVibrate: true,
+      showBadge: true,
       description: 'Daily and weekly habit reminder alerts',
     });
   } catch (err) {
@@ -86,11 +90,10 @@ export function registerForegroundHandler(): void {
     if (!Notifications) return;
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
         shouldShowBanner: true,
         shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
       }),
     });
   } catch (err) {
@@ -110,10 +113,22 @@ export function registerTapHandler(): { remove: () => void } {
       handleNotificationTap(data);
     };
 
-    const lastResponse = Notifications.getLastNotificationResponse?.();
-    navigateFromData(
-      lastResponse?.notification.request.content.data as Record<string, unknown> | undefined
-    );
+    if (typeof Notifications.getLastNotificationResponseAsync === 'function') {
+      Notifications.getLastNotificationResponseAsync()
+        .then((lastResponse) => {
+          if (lastResponse) {
+            navigateFromData(
+              lastResponse.notification.request.content.data as Record<string, unknown> | undefined
+            );
+            if (typeof Notifications.clearLastNotificationResponseAsync === 'function') {
+              Notifications.clearLastNotificationResponseAsync().catch(() => {});
+            }
+          }
+        })
+        .catch((err) => {
+          console.warn('[setup] Failed to get last notification response:', err);
+        });
+    }
 
     return Notifications.addNotificationResponseReceivedListener((response) => {
       navigateFromData(

@@ -72,7 +72,7 @@ export default function OnboardingSlide3() {
               shadowColor={shadowColor}
               shadowDepth={5}
             >
-              <Text style={styles.nextBtnText}>Let's Get Started →</Text>
+              <Text style={styles.nextBtnText}>{"Let's Get Started →"}</Text>
             </Pressable3D>
           </View>
         </View>

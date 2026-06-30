@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font';
@@ -12,6 +12,7 @@ import { PlusJakartaSans_800ExtraBold } from '@expo-google-fonts/plus-jakarta-sa
 
 import {
   createAndroidChannel,
+  isAndroidExpoGo,
   registerForegroundHandler,
   registerTapHandler,
 } from '@/lib/notifications/setup';
@@ -53,6 +54,14 @@ export default function RootLayout() {
   const tapListenerRef = useRef<{ remove: () => void } | null>(null);
   const [showSplash, setShowSplash] = useState(!isAppInitialized);
 
+  const handleSplashFinish = useCallback(() => {
+    isAppInitialized = true;
+    if (typeof global !== 'undefined') {
+      global.isAppInitialized = true;
+    }
+    setShowSplash(false);
+  }, []);
+
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
@@ -62,6 +71,11 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    // Skip all notification setup on Android Expo Go — expo-notifications
+    // removed remote push support in SDK 53 and the module initialisation
+    // throws at require-time in that environment.
+    if (isAndroidExpoGo()) return;
+
     createAndroidChannel();
     registerForegroundHandler();
     tapListenerRef.current = registerTapHandler();
@@ -81,15 +95,7 @@ export default function RootLayout() {
         <RootLayoutContent />
         {showSplash && (
           <View style={StyleSheet.absoluteFill}>
-            <SplashScreenComponent
-              onFinish={() => {
-                isAppInitialized = true;
-                if (typeof global !== 'undefined') {
-                  global.isAppInitialized = true;
-                }
-                setShowSplash(false);
-              }}
-            />
+            <SplashScreenComponent onFinish={handleSplashFinish} />
           </View>
         )}
       </AppThemeProvider>

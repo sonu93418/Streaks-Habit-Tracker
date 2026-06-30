@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -40,8 +40,13 @@ export default function TodayScreen() {
 
   const [confettiActive, setConfettiActive] = useState(false);
 
+  const checkedOnboardingRef = useRef(false);
+
   // Redirection check for onboarding completion on startup
   useEffect(() => {
+    if (checkedOnboardingRef.current) return;
+    checkedOnboardingRef.current = true;
+
     const checkOnboarding = async () => {
       try {
         const completed = await AsyncStorage.getItem('streaks_onboarding_completed_v1');
@@ -97,12 +102,12 @@ export default function TodayScreen() {
   const doneCount = habits.filter((habit) => habit.lastCompletedISO === todayStr).length;
   const allDone = activeTodayCount > 0 && doneCount === activeTodayCount;
 
-  const handleMarkDone = async (id: string) => {
+  const handleMarkDone = useCallback(async (id: string) => {
     const res = await markDone(id);
     if (res) {
       setConfettiActive(true);
     }
-  };
+  }, [markDone]);
 
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>

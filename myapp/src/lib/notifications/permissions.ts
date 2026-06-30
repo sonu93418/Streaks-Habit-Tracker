@@ -3,10 +3,12 @@ import type { PermissionStatus } from 'expo-notifications';
 import Constants from 'expo-constants';
 
 function N() {
-  if (Constants.appOwnership === 'expo') {
+  try {
+    return require('expo-notifications') as typeof import('expo-notifications');
+  } catch (err) {
+    console.warn('[permissions] Failed to require expo-notifications:', err);
     return null;
   }
-  return require('expo-notifications') as typeof import('expo-notifications');
 }
 
 /** Returns the current notification permission status without prompting. */

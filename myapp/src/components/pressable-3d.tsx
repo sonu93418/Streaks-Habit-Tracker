@@ -27,11 +27,15 @@ export function Pressable3D({
 }: Props) {
   const isPressed = useSharedValue(0);
 
+  // Drive the animated position via shared value so useAnimatedStyle only reads it.
+  // withSpring must be assigned to the .value, not called inside useAnimatedStyle.
+  const pressOffset = useSharedValue(0);
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { translateX: withSpring(isPressed.value * shadowDepth, { damping: 15, stiffness: 200 }) },
-        { translateY: withSpring(isPressed.value * shadowDepth, { damping: 15, stiffness: 200 }) },
+        { translateX: pressOffset.value },
+        { translateY: pressOffset.value },
       ],
     };
   });
@@ -39,11 +43,13 @@ export function Pressable3D({
   const handlePressIn = () => {
     if (!disabled) {
       isPressed.value = 1;
+      pressOffset.value = withSpring(shadowDepth, { damping: 15, stiffness: 200 });
     }
   };
 
   const handlePressOut = () => {
     isPressed.value = 0;
+    pressOffset.value = withSpring(0, { damping: 15, stiffness: 200 });
   };
 
   return (

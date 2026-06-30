@@ -107,7 +107,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
 
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     return () => {
-      subscription.remove();
+      subscription?.remove?.();
     };
   }, [register, isSupported, expoPushToken]);
 

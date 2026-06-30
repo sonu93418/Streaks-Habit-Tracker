@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -144,12 +144,12 @@ export function Confetti({ active, x = SCREEN_WIDTH / 2, y = SCREEN_HEIGHT / 2, 
     }
   }, [active]);
 
-  const handleParticleFinished = () => {
+  const handleParticleFinished = useCallback(() => {
     finishedCount.current += 1;
     if (finishedCount.current >= particles.length && onComplete) {
       onComplete();
     }
-  };
+  }, [particles.length, onComplete]);
 
   if (!active || particles.length === 0) return null;
 
